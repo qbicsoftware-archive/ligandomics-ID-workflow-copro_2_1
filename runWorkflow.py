@@ -39,6 +39,9 @@ dmr = ctd_params['dmr']
 msLevels = ctd_params['ms_levels']
 centroided = ctd_params['centroided']
 
+prec_charge = ctd_params['prec_charge']
+activ_method = ctd_params['activ_method']
+
 fixed_mods = []
 variable_mods = []
 
@@ -91,7 +94,7 @@ for mzml in mzmlFiles:
         subprocess.call(pickpeakcommand.format(i=mzml, o=mzml,ms=msLevels).split(),stderr=logfile, stdout=logfile)
 
     #peptide search using comet
-    commandComet = 'CometAdapter -in {i} -out {o} -threads 5 -database {d} -precursor_mass_tolerance {pmt} -fragment_bin_tolerance {fmt} -fragment_bin_offset {fbo} -num_hits {n} -digest_mass_range {dmr} -max_variable_mods_in_peptide {maxmod} -allowed_missed_cleavages 0'.format(i=mzml, o=idPath, d=fasta_decoy_path, pmt=pmt, fmt=fmt, fbo=fbo, n=num_hits, dmr=dmr, maxmod=maxmod) 
+    commandComet = 'CometAdapter -in {i} -out {o} -threads 20 -database {d} -precursor_mass_tolerance {pmt} -fragment_bin_tolerance {fmt} -fragment_bin_offset {fbo} -num_hits {n} -digest_mass_range {dmr} -max_variable_mods_in_peptide {maxmod} -allowed_missed_cleavages 0 -precursor_charge {prc} -activation_method {acm}'.format(i=mzml, o=idPath, d=fasta_decoy_path, pmt=pmt, fmt=fmt, fbo=fbo, n=num_hits, dmr=dmr, maxmod=maxmod, prc=prec_charge, acm=activ_method)
     if len(fixed) > 0 and len(variable) > 0:
         subprocess.call(commandComet.split() + ["-fixed_modifications", fixed, "-variable_modifications", variable, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
     elif len(fixed) > 0:

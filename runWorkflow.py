@@ -94,15 +94,15 @@ for mzml in mzmlFiles:
         subprocess.call(pickpeakcommand.format(i=mzml, o=mzml,ms=msLevels).split(),stderr=logfile, stdout=logfile)
 
     #peptide search using comet
-    commandComet = 'CometAdapter -in {i} -out {o} -threads 20 -database {d} -precursor_mass_tolerance {pmt} -fragment_bin_tolerance {fmt} -fragment_bin_offset {fbo} -num_hits {n} -digest_mass_range {dmr} -max_variable_mods_in_peptide {maxmod} -allowed_missed_cleavages 0 -precursor_charge {prc} -activation_method {acm}'.format(i=mzml, o=idPath, d=fasta_decoy_path, pmt=pmt, fmt=fmt, fbo=fbo, n=num_hits, dmr=dmr, maxmod=maxmod, prc=prec_charge, acm=activ_method)
+    commandComet = 'CometAdapter -in {i} -out {o} -threads 20 -database {d} -precursor_mass_tolerance {pmt} -fragment_bin_tolerance {fmt} -fragment_bin_offset {fbo} -num_hits {n} -digest_mass_range {dmr} -max_variable_mods_in_peptide {maxmod} -allowed_missed_cleavages 0 -precursor_charge {prc} -activation_method {acm} -use_NL_ions true'.format(i=mzml, o=idPath, d=fasta_decoy_path, pmt=pmt, fmt=fmt, fbo=fbo, n=num_hits, dmr=dmr, maxmod=maxmod, prc=prec_charge, acm=activ_method)
     if len(fixed) > 0 and len(variable) > 0:
         subprocess.call(commandComet.split() + ["-fixed_modifications", fixed, "-variable_modifications", variable, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
     elif len(fixed) > 0:
         subprocess.call(commandComet.split() + ["-fixed_modifications", fixed, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
     elif len(variable) > 0:
-        subprocess.call(commandComet.split() + ["-variable_modifications", variable, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
+        subprocess.call(commandComet.split() + ["-fixed_modifications ", "-variable_modifications", variable, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
     else:
-        subprocess.call(commandComet.split() + ["-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
+        subprocess.call(commandComet.split() + ["-fixed_modifications ", "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
 
     #index decoy and target hits
     peptideIndexer = 'PeptideIndexer -in {f} -out {o} -threads 5 -fasta {d} -decoy_string DECOY -enzyme:specificity none -enzyme:name '.format(f=idPath, o=idPath, d=fasta_decoy_path)

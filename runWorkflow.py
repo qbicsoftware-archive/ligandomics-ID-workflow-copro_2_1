@@ -100,9 +100,9 @@ for mzml in mzmlFiles:
     elif len(fixed) > 0:
         subprocess.call(commandComet.split() + ["-fixed_modifications", fixed, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
     elif len(variable) > 0:
-        subprocess.call(commandComet.split() + ["-fixed_modifications ", "-variable_modifications", variable, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
+        subprocess.call(commandComet.split() + ["-fixed_modifications", "-variable_modifications", variable, "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
     else:
-        subprocess.call(commandComet.split() + ["-fixed_modifications ", "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
+        subprocess.call(commandComet.split() + ["-fixed_modifications", "-enzyme", "unspecific cleavage"],stderr=logfile, stdout=logfile)
 
     #index decoy and target hits
     peptideIndexer = 'PeptideIndexer -in {f} -out {o} -threads 5 -fasta {d} -decoy_string DECOY -enzyme:specificity none -enzyme:name '.format(f=idPath, o=idPath, d=fasta_decoy_path)

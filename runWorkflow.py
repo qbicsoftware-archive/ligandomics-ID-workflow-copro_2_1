@@ -165,14 +165,9 @@ subprocess.call(idFilter.split(),stderr=logfile, stdout=logfile)
 convert = 'TextExporter -in {f} -out {o} -id:add_hit_metavalues 0 -id:add_metavalues 0 -id:peptides_only'.format(f=idresult, o=idresult.replace('.idXML', '_rank1.csv'))
 subprocess.call(convert.split(),stderr=logfile, stdout=logfile)   
 
-#calculate fdr on merged rank1 hits
-idresult_fdr = os.path.join(result_path, identifer_for_files.replace('.idXML', '_merged_fdr.idXML'))
-falseDiscovery = 'FalseDiscoveryRate -in {f} -out {o} -threads 5 -algorithm:add_decoy_peptides'.format(f=idresult,o=idresult_fdr)
-subprocess.call(falseDiscovery.split(),stderr=logfile, stdout=logfile)
-
 #extract Percolator Features with PSMFeatureExtractor
 idresult_fdr_psm = os.path.join(result_path, identifer_for_files.replace('.idXML', '_merged_fdr_psm.idXML'))
-PSMFeat = 'PSMFeatureExtractor -in {f} -out {o} -threads 5'.format(f=idresult_fdr,o=idresult_fdr_psm)
+PSMFeat = 'PSMFeatureExtractor -in {f} -out {o} -threads 5'.format(f=idresult,o=idresult_fdr_psm)
 subprocess.call(PSMFeat.split(),stderr=logfile, stdout=logfile)
 
 #run Percolator
@@ -238,7 +233,7 @@ idexport_rank1=pd.read_csv(idresult.replace('.idXML', '_rank1.csv'), sep='\t')
 idexport_edit=pd.read_csv(mergeresult.replace('.consensusXML', '_edit.csv'), sep=',')
 idexport_edit=idexport_edit[['sequence', 'rt_cf', 'mz_cf', 'intensity_cf']]
 idexport_filtered=idexport_filtered.loc[idexport_filtered.groupby('sequence')['score'].idxmin()]
-idexport_filtered=idexport_filtered[['sequence','score','COMET:deltCn','expect_score','file_origin','spectrum_reference','COMET:IonFrac','MS:1002252']]
+idexport_filtered=idexport_filtered[['sequence','score','COMET:deltCn','file_origin','spectrum_reference','COMET:IonFrac','MS:1002252']]
 merged=idexport_edit.merge(idexport_filtered, on='sequence', how='left')
 num=idexport_rank1.groupby('sequence').apply(len).reset_index()
 num.columns=['sequence','num_psms']
@@ -251,12 +246,13 @@ if num_hits>=2:
     idexport_rank2=idexport_rank2[['sequence','accessions','score','MS:1002252','spectrum_reference','file_origin']]
     idexport_rank2.columns=['sequence_rank2','accessions_rank2','score_rank2','MS:1002252_rank2','spectrum_reference','file_origin']
     merged=merged.merge(idexport_rank2, on=['spectrum_reference','file_origin'], how='left')
-    merged=merged[['spectrum_reference','file_origin','sequence', 'score', 'rt_cf', 'mz_cf', 'intensity_cf','accessions','num_psms','expect_score','COMET:IonFrac','MS:1002252','sequence_rank2','accessions_rank2','MS:1002252_rank2']]
-    merged.columns=['spectrum_reference','file_origin','sequence', 'fdr', 'rt_cf', 'mz_cf', 'intensity','accessions','num_psms','expect_score','COMET:IonFrac','XCorr','sequence_rank2','accessions_rank2','XCorr_rank2']
+    merged=merged[['spectrum_reference','file_origin','sequence', 'score', 'rt_cf', 'mz_cf', 'intensity_cf','accessions','num_psms','COMET:IonFrac','MS:1002252','sequence_rank2','accessions_rank2','MS:1002252_rank2']]
+    merged.columns=['spectrum_reference','file_origin','sequence', 'fdr', 'rt_cf', 'mz_cf', 'intensity','accessions','num_psms','COMET:IonFrac','XCorr','sequence_rank2','accessions_rank2','XCorr_rank2']
     merged['deltaCn']=(merged['XCorr']-merged['XCorr_rank2'])/merged['XCorr']
 else:
-    merged=merged[['spectrum_reference','file_origin','sequence', 'score', 'rt_cf', 'mz_cf', 'intensity_cf','accessions','num_psms','expect_score','COMET:IonFrac','MS:1002252']]
-    merged.columns=['spectrum_reference','file_origin','sequence', 'fdr', 'rt_cf', 'mz_cf', 'intensity','accessions','num_psms','expect_score','COMET:IonFrac','XCorr']
+    merged=merged[['spectrum_reference','file_origin','sequence', 'score', 'rt_cf', 'mz_cf', 'intensity_cf','accessions','num_psms','COMET:IonFrac','MS:1002252']]
+    merged.columns=['spectrum_reference','file_origin','sequence', 'fdr', 'rt_cf', 'mz_cf', 'intensity','accessions','num_psms','COMET:IonFrac','XCorr']
 merged.to_csv(mergeresult.replace('.consensusXML', '_final_output.csv'))
 
 logfile.close()
+subprocess.call(["mv", logfilename, log_path])
